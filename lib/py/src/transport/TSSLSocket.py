@@ -250,6 +250,7 @@ class TSSLSocket(TSocket.TSocket, TSSLBase):
 
         validate = kwargs.pop('validate', None)
         if validate is not None:
+            logger.debug('TSSLSocket -> if validate')
             cert_reqs_name = 'CERT_REQUIRED' if validate else 'CERT_NONE'
             warnings.warn(
                 'validate is deprecated. please use cert_reqs=ssl.%s instead'
