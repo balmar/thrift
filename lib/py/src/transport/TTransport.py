@@ -22,7 +22,7 @@ from thrift.Thrift import TException
 from ..compat import BufferIO
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger('TTransport')
 
 class TTransportException(TException):
     """Custom Transport Exception class"""
