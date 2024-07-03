@@ -22,7 +22,7 @@ from thrift.Thrift import TException
 from ..compat import BufferIO
 import logging
 
-logger = logging.getLogger('TTransport')
+logger = logging.getLogger()
 
 class TTransportException(TException):
     """Custom Transport Exception class"""
@@ -376,38 +376,38 @@ class TSaslClientTransport(TTransportBase, CReadableTransport):
         self.__rbuf = BufferIO(b'')
 
     def open(self):
-        logger.critical('TSaslClientTransport open called')
+        print('TSaslClientTransport open called')
         if not self.transport.isOpen():
-            logger.critical('TSaslClientTransport open Transport')
+            print('TSaslClientTransport open Transport')
             self.transport.open()
 
-        logger.critical('TSaslClientTransport send START msg')
+        print('TSaslClientTransport send START msg')
         self.send_sasl_msg(self.START, bytes(self.sasl.mechanism, 'ascii'))
-        logger.critical('TSaslClientTransport send OK msg')
+        print('TSaslClientTransport send OK msg')
         self.send_sasl_msg(self.OK, self.sasl.process())
-        logger.critical('TSaslClientTransport send OK msg')
+        print('TSaslClientTransport send OK msg')
 
         while True:
-            logger.critical('TSaslClientTransport while loop')
+            print('TSaslClientTransport while loop')
             status, challenge = self.recv_sasl_msg()
-            logger.critical('TSaslClientTransport while loop received %s;%s' % (status, challenge))
+            print('TSaslClientTransport while loop received %s;%s' % (status, challenge))
             if status == self.OK:
-                logger.critical('TSaslClientTransport while loop status OK')
+                print('TSaslClientTransport while loop status OK')
                 self.send_sasl_msg(self.OK, self.sasl.process(challenge))
-                logger.critical('TSaslClientTransport while loop send OK')
+                print('TSaslClientTransport while loop send OK')
             elif status == self.COMPLETE:
-                logger.critical('TSaslClientTransport while loop status COMPLETE')
+                print('TSaslClientTransport while loop status COMPLETE')
                 if not self.sasl.complete:
-                    logger.critical('TSaslClientTransport while loop connection died')
+                    print('TSaslClientTransport while loop connection died')
                     raise TTransportException(
                         TTransportException.NOT_OPEN,
                         "The server erroneously indicated "
                         "that SASL negotiation was complete")
                 else:
-                    logger.critical('TSaslClientTransport status not complete')
+                    print('TSaslClientTransport status not complete')
                     break
             else:
-                logger.critical('TSaslClientTransport status not OK and not COMPLETE: %s' % status)
+                print('TSaslClientTransport status not OK and not COMPLETE: %s' % status)
                 raise TTransportException(
                     TTransportException.NOT_OPEN,
                     "Bad SASL negotiation status: %d (%s)"
@@ -417,59 +417,59 @@ class TSaslClientTransport(TTransportBase, CReadableTransport):
         return self.transport.isOpen()
 
     def send_sasl_msg(self, status, body):
-        logger.critical('TSaslClientTransport sending sasl msg')
+        print('TSaslClientTransport sending sasl msg')
         header = pack(">BI", status, len(body))
         self.transport.write(header + body)
         self.transport.flush()
-        logger.critical('TSaslClientTransport sending sasl msg FINISH')
+        print('TSaslClientTransport sending sasl msg FINISH')
 
     def recv_sasl_msg(self):
-        logger.critical('TSaslClientTransport receive sasl msg')
+        print('TSaslClientTransport receive sasl msg')
         header = self.transport.readAll(5)
         status, length = unpack(">BI", header)
         if length > 0:
             payload = self.transport.readAll(length)
         else:
             payload = ""
-        logger.critical('TSaslClientTransport receive sasl msg finished')
+        print('TSaslClientTransport receive sasl msg finished')
         return status, payload
 
     def write(self, data):
         self.__wbuf.write(data)
 
     def flush(self):
-        logger.critical('TSaslClientTransport flush')
+        print('TSaslClientTransport flush')
         data = self.__wbuf.getvalue()
         encoded = self.sasl.wrap(data)
         self.transport.write(pack("!i", len(encoded)) + encoded)
         self.transport.flush()
         self.__wbuf = BufferIO()
-        logger.critical('TSaslClientTransport flush finished')
+        print('TSaslClientTransport flush finished')
 
     def read(self, sz):
-        logger.critical('TSaslClientTransport flush read')
+        print('TSaslClientTransport flush read')
         ret = self.__rbuf.read(sz)
         if len(ret) != 0:
-            logger.critical('TSaslClientTransport flush read ret')
+            print('TSaslClientTransport flush read ret')
             return ret
 
         self._read_frame()
-        logger.critical('TSaslClientTransport flush read buf.read')
+        print('TSaslClientTransport flush read buf.read')
         return self.__rbuf.read(sz)
 
     def _read_frame(self):
-        logger.critical('TSaslClientTransport flush read_frame')
+        print('TSaslClientTransport flush read_frame')
         header = self.transport.readAll(4)
         length, = unpack('!i', header)
         encoded = self.transport.readAll(length)
         self.__rbuf = BufferIO(self.sasl.unwrap(encoded))
-        logger.critical('TSaslClientTransport flush read_frame finished')
+        print('TSaslClientTransport flush read_frame finished')
 
     def close(self):
-        logger.critical('TSaslClientTransport flush read_frame close')
+        print('TSaslClientTransport flush read_frame close')
         self.sasl.dispose()
         self.transport.close()
-        logger.critical('TSaslClientTransport flush read_frame close finished')
+        print('TSaslClientTransport flush read_frame close finished')
 
     # based on TFramedTransport
     @property
