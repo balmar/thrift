@@ -120,27 +120,38 @@ class TSocket(TSocketBase):
         return self._unix_socket if self._unix_socket else '%s:%d' % (self.host, self.port)
 
     def open(self):
+        print('TSocket opening')
         if self.handle:
             raise TTransportException(type=TTransportException.ALREADY_OPEN, message="already open")
         try:
+            print('TSocket resolvingAddr')
             addrs = self._resolveAddr()
+            print('TSocket %s' %addrs)
         except socket.gaierror as gai:
+            print('TSocket failed to resolve')
+            
             msg = 'failed to resolve sockaddr for ' + str(self._address)
             logger.exception(msg)
             raise TTransportException(type=TTransportException.NOT_OPEN, message=msg, inner=gai)
         for family, socktype, _, _, sockaddr in addrs:
+            print('TSocket loop %s %s %s' % (family, socktype, sockaddr))
             handle = self._do_open(family, socktype)
-
+            print('TSocket opened handle')
             # TCP keep-alive
             if self._socket_keepalive:
+                print('TSocket keeping alive')
                 handle.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
+            print('TSocket setting timeout')
             handle.settimeout(self._timeout)
             try:
+                print('TSocket connecting')
                 handle.connect(sockaddr)
                 self.handle = handle
+                print('TSocket open finished')
                 return
-            except socket.error:
+            except socket.error as err:
+                print('TSocket error %s' % err)
                 handle.close()
                 logger.info('Could not connect to %s', sockaddr, exc_info=True)
         msg = 'Could not connect to any of %s' % list(map(lambda a: a[4],
