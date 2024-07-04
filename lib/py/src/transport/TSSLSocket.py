@@ -189,7 +189,7 @@ class TSSLBase(object):
             print('TSSLSocket - _wrap_socket - has_ssl_context wrapping')
             return self.ssl_context.wrap_socket(
                 sock, server_side=self._server_side,
-                server_hostname=self._server_hostname)
+                server_hostname=self._server_hostname, do_handshake_on_connect=False)
         else:
             print('TSSLSocket - _wrap_socket - no context')
             ssl_opts = {
