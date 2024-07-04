@@ -29,6 +29,7 @@ from thrift.transport import TSocket
 from thrift.transport.TTransport import TTransportException
 
 logger = logging.getLogger(__name__)
+print('Attaching logger %s' % __name__)
 warnings.filterwarnings(
     'default', category=DeprecationWarning, module=__name__)
 
@@ -169,20 +170,28 @@ class TSSLBase(object):
         self._certfile = certfile
 
     def _wrap_socket(self, sock):
+        print('TSSLSocket - _wrap_socket')
         if self._has_ssl_context:
+            print('TSSLSocket - _wrap_socket - has_ssl_context')
             if not self._custom_context:
+                print('TSSLSocket - _wrap_socket - not custom context')
                 self.ssl_context.verify_mode = self.cert_reqs
                 if self.certfile:
+                    print('TSSLSocket - _wrap_socket - certfile')
                     self.ssl_context.load_cert_chain(self.certfile,
                                                      self.keyfile)
                 if self.ciphers:
+                    print('TSSLSocket - _wrap_socket - ciphers')
                     self.ssl_context.set_ciphers(self.ciphers)
                 if self.ca_certs:
+                    print('TSSLSocket - _wrap_socket - cacerts')
                     self.ssl_context.load_verify_locations(self.ca_certs)
+            print('TSSLSocket - _wrap_socket - has_ssl_context wrapping')
             return self.ssl_context.wrap_socket(
                 sock, server_side=self._server_side,
                 server_hostname=self._server_hostname)
         else:
+            print('TSSLSocket - _wrap_socket - no context')
             ssl_opts = {
                 'ssl_version': self._ssl_version,
                 'server_side': self._server_side,
@@ -192,11 +201,13 @@ class TSSLBase(object):
                 'cert_reqs': self.cert_reqs,
             }
             if self.ciphers:
+                print('TSSLSocket - _wrap_socket - no context - ciphers')
                 if self._has_ciphers:
                     ssl_opts['ciphers'] = self.ciphers
                 else:
                     logger.warning(
                         'ciphers is specified but ignored due to old Python version')
+            print('TSSLSocket - _wrap_socket - no context - wrapping')
             return ssl.wrap_socket(sock, **ssl_opts)
 
 
@@ -289,10 +300,14 @@ class TSSLSocket(TSocket.TSocket, TSSLBase):
         self.cert_reqs = ssl.CERT_REQUIRED if value else ssl.CERT_NONE
 
     def _do_open(self, family, socktype):
+        print('TSSLSocket - _do_open')
         plain_sock = socket.socket(family, socktype)
+        print('TSSLSocket - Socket opened')
         try:
+            print('TSSLSocket - wrapping')
             return self._wrap_socket(plain_sock)
         except Exception as ex:
+            print('TSSLSocket - exception %s' % str(ex))
             plain_sock.close()
             msg = 'failed to initialize SSL'
             logger.exception(msg)
