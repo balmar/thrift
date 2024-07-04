@@ -137,7 +137,7 @@ class TSSLBase(object):
         else:
             self._custom_context = False
             ssl_version = ssl_opts.pop('ssl_version', TSSLBase.SSL_VERSION)
-            print('ssl_version %s' % ssl_version)
+            print('TSSLSocket - ssl_version %s' % ssl_version)
             self._init_context(ssl_version)
             self.cert_reqs = ssl_opts.pop('cert_reqs', ssl.CERT_REQUIRED)
             self.ca_certs = ssl_opts.pop('ca_certs', None)
@@ -201,6 +201,8 @@ class TSSLBase(object):
                 'certfile': self.certfile,
                 'cert_reqs': self.cert_reqs,
             }
+            
+            print('TSSLSocket')
             if self.ciphers:
                 print('TSSLSocket - _wrap_socket - no context - ciphers')
                 if self._has_ciphers:
