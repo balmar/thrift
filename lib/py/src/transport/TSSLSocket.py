@@ -46,8 +46,7 @@ class TSSLBase(object):
     # SSL 2.0 and 3.0 are disabled via ssl.OP_NO_SSLv2 and ssl.OP_NO_SSLv3.
     # For python < 2.7.9, use TLS 1.0 since TLSv1_X nor OP_NO_SSLvX is
     # unavailable.
-    _default_protocol = ssl.PROTOCOL_SSLv23 if _has_ssl_context else \
-        ssl.PROTOCOL_TLSv1
+    _default_protocol = ssl.PROTOCOL_TLSv1_2
 
     def _init_context(self, ssl_version):
         if self._has_ssl_context:
@@ -189,7 +188,7 @@ class TSSLBase(object):
             print('TSSLSocket - _wrap_socket - has_ssl_context wrapping')
             return self.ssl_context.wrap_socket(
                 sock, server_side=self._server_side,
-                server_hostname=self._server_hostname, do_handshake_on_connect=False)
+                server_hostname=self._server_hostname)
         else:
             print('TSSLSocket - _wrap_socket - no context')
             ssl_opts = {
