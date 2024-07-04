@@ -126,7 +126,6 @@ class TSSLBase(object):
         if not self._server_side:
             self._server_hostname = ssl_opts.pop('server_hostname', host)
         if self._context:
-            print('TSSLSocket context?')
             self._custom_context = True
             if ssl_opts:
                 raise ValueError(
