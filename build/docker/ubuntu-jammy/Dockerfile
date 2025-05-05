@@ -136,12 +136,13 @@ RUN apt-get install -y --no-install-recommends \
   dart=$DART_VERSION
 ENV PATH /usr/lib/dart/bin:$PATH
 
+RUN add-apt-repository ppa:dotnet/backports
 RUN apt-get install -y --no-install-recommends \
   `# dotnet core dependencies` \
-  dotnet-sdk-8.0 \
-  dotnet-runtime-8.0 \
-  aspnetcore-runtime-8.0 \
-  dotnet-apphost-pack-8.0
+  dotnet-sdk-9.0 \
+  dotnet-runtime-9.0 \
+  aspnetcore-runtime-9.0 \
+  dotnet-apphost-pack-9.0
 
 # Erlang dependencies
 ARG ERLANG_OTP_VERSION=25.3.2.9
@@ -206,8 +207,8 @@ RUN apt-get install -y --no-install-recommends \
 
 RUN apt-get install -y --no-install-recommends \
   `# Lua dependencies` \
-  lua5.2 \
-  lua5.2-dev
+  lua5.4 \
+  liblua5.4-dev
 # https://bugs.launchpad.net/ubuntu/+source/lua5.3/+bug/1707212
 # lua5.3 does not install alternatives!
 # need to update our luasocket code, lua doesn't have luaL_openlib any more
@@ -259,7 +260,6 @@ RUN apt-get install -y --no-install-recommends \
   python3-all-dev \
   python3-pip \
   python3-setuptools \
-  python3-six \
   python3-tornado \
   python3-twisted \
   python3-wheel \
@@ -273,7 +273,7 @@ RUN apt-get install -y --no-install-recommends \
 
 USER ${user}
 RUN `# Rust dependencies` \
-    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.65.0 -y
+    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.83.0 -y
 ENV PATH /home/${user}/.cargo/bin:$PATH
 USER root
 

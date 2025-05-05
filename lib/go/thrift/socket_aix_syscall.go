@@ -1,3 +1,6 @@
+//go:build aix
+// +build aix
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -17,14 +20,10 @@
  * under the License.
  */
 
-// Testcase for THRIFT-5320 Usage of "Task" as IDL identifier generates uncompileable code
+package thrift
 
-namespace * Thrift5320.exceptions
+import "syscall"
 
-
-
-exception Task { 
-	1: Task left 
-	2: Task right 
+func peekNonblocking(fd int, p []byte) (int, syscall.Sockaddr, error) {
+	return syscall.Recvfrom(fd, p, syscall.MSG_PEEK|syscall.MSG_NONBLOCK)
 }
-
