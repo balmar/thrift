@@ -16,13 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
 from io import BytesIO
 from struct import pack, unpack
 
 from thrift.Thrift import TException
-
-logger = logging.getLogger()
 
 class TTransportException(TException):
     """Custom Transport Exception class"""
