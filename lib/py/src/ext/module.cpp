@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#ifndef PY_SSIZE_T_CLEAN
+  #define PY_SSIZE_T_CLEAN
+#endif
 
 #include <Python.h>
 #include "types.h"

@@ -376,38 +376,25 @@ class TSaslClientTransport(TTransportBase, CReadableTransport):
         self.__rbuf = BytesIO(b'')
 
     def open(self):
-        print('TSaslClientTransport open called')
         if not self.transport.isOpen():
-            print('TSaslClientTransport open Transport')
             self.transport.open()
 
-        print('TSaslClientTransport send START msg')
         self.send_sasl_msg(self.START, bytes(self.sasl.mechanism, 'ascii'))
-        print('TSaslClientTransport send OK msg')
         self.send_sasl_msg(self.OK, self.sasl.process())
-        print('TSaslClientTransport send OK msg')
 
         while True:
-            print('TSaslClientTransport while loop')
             status, challenge = self.recv_sasl_msg()
-            print('TSaslClientTransport while loop received %s;%s' % (status, challenge))
             if status == self.OK:
-                print('TSaslClientTransport while loop status OK')
                 self.send_sasl_msg(self.OK, self.sasl.process(challenge))
-                print('TSaslClientTransport while loop send OK')
             elif status == self.COMPLETE:
-                print('TSaslClientTransport while loop status COMPLETE')
                 if not self.sasl.complete:
-                    print('TSaslClientTransport while loop connection died')
                     raise TTransportException(
                         TTransportException.NOT_OPEN,
                         "The server erroneously indicated "
                         "that SASL negotiation was complete")
                 else:
-                    print('TSaslClientTransport status not complete')
                     break
             else:
-                print('TSaslClientTransport status not OK and not COMPLETE: %s' % status)
                 raise TTransportException(
                     TTransportException.NOT_OPEN,
                     "Bad SASL negotiation status: %d (%s)"
@@ -417,28 +404,23 @@ class TSaslClientTransport(TTransportBase, CReadableTransport):
         return self.transport.isOpen()
 
     def send_sasl_msg(self, status, body):
-        print('TSaslClientTransport sending sasl msg')
         header = pack(">BI", status, len(body))
         self.transport.write(header + body)
         self.transport.flush()
-        print('TSaslClientTransport sending sasl msg FINISH')
 
     def recv_sasl_msg(self):
-        print('TSaslClientTransport receive sasl msg')
         header = self.transport.readAll(5)
         status, length = unpack(">BI", header)
         if length > 0:
             payload = self.transport.readAll(length)
         else:
             payload = ""
-        print('TSaslClientTransport receive sasl msg finished')
         return status, payload
 
     def write(self, data):
         self.__wbuf.write(data)
 
     def flush(self):
-        print('TSaslClientTransport flush')
         data = self.__wbuf.getvalue()
         encoded = self.sasl.wrap(data)
         self.transport.write(pack("!i", len(encoded)) + encoded)
@@ -446,28 +428,22 @@ class TSaslClientTransport(TTransportBase, CReadableTransport):
         self.__wbuf = BytesIO()
 
     def read(self, sz):
-        print('TSaslClientTransport flush read')
         ret = self.__rbuf.read(sz)
         if len(ret) != 0:
-            print('TSaslClientTransport flush read ret')
             return ret
 
         self._read_frame()
-        print('TSaslClientTransport flush read buf.read')
         return self.__rbuf.read(sz)
 
     def _read_frame(self):
-        print('TSaslClientTransport flush read_frame')
         header = self.transport.readAll(4)
         length, = unpack('!i', header)
         encoded = self.transport.readAll(length)
         self.__rbuf = BytesIO(self.sasl.unwrap(encoded))
 
     def close(self):
-        print('TSaslClientTransport flush read_frame close')
         self.sasl.dispose()
         self.transport.close()
-        print('TSaslClientTransport flush read_frame close finished')
 
     # based on TFramedTransport
     @property
